@@ -12,7 +12,7 @@ managedNodeGroups:
   - name: managed-ng-1
     instanceType: t2.small
     minSize: 1
-    maxSize: 1
+    maxSize: 3
     desiredCapacity: 1
     volumeSize: 8
     labels: {role: worker}
