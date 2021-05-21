@@ -1,0 +1,76 @@
+# kubectl apply -f cluster_objects.yaml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: webapp
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1 
+kind: ClusterRoleBinding
+metadata:
+        name: default-sa-namespace-admin
+        namespace: webapp
+roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: admin
+subjects:
+      - apiGroup: rbac.authorization.k8s.io
+        kind: User
+        name: system:serviceaccount:webapp:default
+        
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drupal-dep
+  labels:
+    app: drupal
+  namespace: webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drupal
+  template:
+    metadata:
+      labels:
+        app: drupal
+    spec:
+      containers:
+      - name: drupal
+        image: drupal:8.5.0
+        ports:
+        - containerPort: 80
+        
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: drupal-svc
+  labels:
+    name: drupal-dep
+  namespace: webapp
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  type: LoadBalancer
+  selector:
+    app: drupal
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ctf
+  namespace: kube-system
+type: Opaque
+data:
+  flag: ZmxhZ3s0MTFfeW91cl9jMXU1K2VyNV82ZTFvbjlfK29fbWV9Cg==
